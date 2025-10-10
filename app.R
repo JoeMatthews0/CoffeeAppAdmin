@@ -10,6 +10,13 @@ if (!file.exists(helpers_path)) {
   source(helpers_path, local = TRUE, chdir = TRUE)
 }
 
+message("ADMIN env lengths: sheet=", nchar(Sys.getenv("COFFEE_SHEET_ID","")),
+        " GSA_JSON=", nchar(Sys.getenv("GSA_JSON","")),
+        " GSA_JSON_B64=", nchar(Sys.getenv("GSA_JSON_B64","")))
+msg_first <- substr(trimws(Sys.getenv("GSA_JSON","")), 1, 3)
+message("ADMIN GSA_JSON starts with: '", msg_first, "' (expect '{' for raw JSON, or 'eyJ' for base64)")
+
+
 # Minimal deps used below
 suppressPackageStartupMessages({
   library(shiny); library(bslib); library(dplyr); library(tibble)
