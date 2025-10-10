@@ -68,7 +68,7 @@ ui <- page_fluid(
   theme = bs_theme(version = 5),
   titlePanel("☕ Coffee Club – Admin Top-ups"),
   layout_columns(
-    col_6(
+    column(6,
       card(
         card_header("Record top-up"),
         textInput("staff_id", "Staff ID"),
@@ -78,7 +78,7 @@ ui <- page_fluid(
         actionButton("submit", "Add Top-up", class = "btn-success")
       )
     ),
-    col_6(
+    column(6,
       card(card_header("Current balance"), uiOutput("balance_ui")),
       card(card_header("All balances (top 20)"), tableOutput("leaderboard"))
     )
