@@ -6,7 +6,6 @@ suppressPackageStartupMessages({
   library(dplyr)
   library(tibble)
   library(glue)
-  library(shinythemes)
   library(shinyjs)    # for runjs / useShinyjs
   source("R/gs_utils.R")
 })
@@ -14,7 +13,7 @@ suppressPackageStartupMessages({
 ensure_sheets_exist()
 
 ui <- fluidPage(
-  theme = shinytheme("flatly"),
+  theme = bs_theme(bootswatch = "flatly"),
   useShinyjs(),
   
   # Add a container around the entire body content for padding
