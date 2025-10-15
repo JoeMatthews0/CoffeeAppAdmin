@@ -86,6 +86,35 @@ cred_from_env <- function() {
   }
 }
 
+ensure_sheets_exist <- function() {
+  ss <- .sheet()
+  existing <- sheet_names(ss)
+  if (!"transactions" %in% existing) {
+    # Write with correct column classes hinted as text, then we coerce on read
+    sheet_write(
+      tibble(
+        timestamp = as_datetime(character()),
+        staff_id = character(),
+        name = character(),
+        type = character(), # "coffee" or "topup"
+        coffees = integer(), # count for coffee rows
+        amount = double(), # negative for coffees, positive for topups
+        note = character(),
+        submitted_by = character()
+      ),
+      ss = ss,
+      sheet = "transactions"
+    )
+  }
+  if (!"config" %in% existing) {
+    sheet_write(
+      tibble(key = c("coffee_price", "topup_threshold"),
+             value = c("0.5", "2.0")),
+      ss = ss,
+      sheet = "config"
+    )
+  }
+}
 
 .get_sheet_id <- function() {
   sid <- Sys.getenv("COFFEE_SHEET_ID", "")
