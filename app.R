@@ -61,31 +61,32 @@ ui <- fluidPage(
     })();
   "))),
       titlePanel("MSP Coffee Tracker -- Admin Page (BETA Version)"),
-      
-      fluidRow(
-        h2("Top-Up Accounts"),
-        column(4,
-               h3("1. Select Existing Coffee Drinker"),
+      card(
+        fluidRow(
+          h2("Top-Up Accounts"),
+          column(4,
+               h4("1. Select Existing Coffee Drinker"),
                selectizeInput("name_pick", "Select existing user:",
                               choices = NULL, multiple = FALSE,
                               options = list(placeholder = "Start typing staff name or ID")),
-               h3("OR 1. Add New Coffee Drinker"),
+               h4("OR 1. Add New Coffee Drinker"),
                  textInput("staff_id", "Staff ID", placeholder = "nXX123"),
                  textInput("name", "Name", placeholder = "First Last")
-        ),
-        column(4,
-               h3("2. Enter Top Up Amount"),
+          ),
+          column(4,
+               h4("2. Enter Top Up Amount"),
                fluidRow(
                  numericInput("amount", "Amount received (£)", value = 5, min = 0.5, step = 0.5),
                  textInput("admin_name", "Recorded by", placeholder = "Name")
                )
-        ),
-        column(4,
-               h3("3. Record Top-Up"),
+          ),
+          column(4,
+               h4("3. Record Top-Up"),
                actionButton("submit", "Add Top-up", class = "btn-success")
+          )
         )
       ),
-      
+      card(
       fluidRow(
         h2("Current Balances"),
         conditionalPanel('input.submit',
@@ -93,12 +94,13 @@ ui <- fluidPage(
         ),
         fluidRow(
           column(6,
-                 h3("All Balances"),
+                 h4("All Balances"),
                  tableOutput("leaderboard")
           ),
           column(6,
-                 h3("Accounts in Arrears (Balance < £0)"),
+                 h4("Accounts in Arrears (Balance < £0)"),
                  tableOutput("low_bal_tbl")
+          )
           )
         )
       )
