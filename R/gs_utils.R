@@ -99,7 +99,6 @@ ensure_sheets_exist <- function() {
         type = character(), # "coffee" or "topup"
         coffees = integer(), # count for coffee rows
         amount = double(), # negative for coffees, positive for topups
-        note = character(),
         submitted_by = character()
       ),
       ss = ss,
@@ -133,17 +132,17 @@ coerce_integer_safe  <- function(x) suppressWarnings(as.integer(x))
 
 read_transactions <- function() {
   ss <- .sheet()
-  read_sheet(ss, sheet = "transactions", col_types = "Tcccidcc") |>
+  read_sheet(ss, sheet = "transactions", col_types = "Tcccidc") |>
     mutate(
       timestamp = with_tz(timestamp, tzone = Sys.timezone()),
       coffees   = coerce_integer_safe(coffees),
       amount    = coerce_numeric_safe(amount),
-      across(c(staff_id, name, type, note, submitted_by), as.character)
+      across(c(staff_id, name, type, submitted_by), as.character)
     )
 }
 
 append_transaction <- function(staff_id, name, type = c("coffee","topup"),
-                               coffees = 0L, amount = 0, note = "", submitted_by = "app") {
+                               coffees = 0L, amount = 0, submitted_by = "app") {
   type <- match.arg(type)
   ss <- .sheet()
   df <- tibble(
@@ -153,7 +152,6 @@ append_transaction <- function(staff_id, name, type = c("coffee","topup"),
     type        = type,
     coffees     = as.integer(coffees),
     amount      = as.numeric(amount),
-    note        = as.character(note),
     submitted_by= as.character(submitted_by)
   )
   sheet_append(df, ss = ss, sheet = "transactions")

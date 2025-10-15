@@ -188,7 +188,6 @@ server <- function(input, output, session) {
       type         = "topup",
       coffees      = 0L,
       amount       = as.numeric(input$amount),
-      note         = "",  # note field no longer used; keep empty
       submitted_by = paste0("admin:", admin_nm)
     )
     
