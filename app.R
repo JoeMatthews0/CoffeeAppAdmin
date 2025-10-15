@@ -1,5 +1,9 @@
 # app_admin.R — admin name memory + dropdown for users + low-balance table
 
+if (!require(shinythemes)) {
+  install.packages("shinythemes")
+}
+
 suppressPackageStartupMessages({
   library(shiny)
   library(bslib)
