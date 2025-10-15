@@ -61,6 +61,7 @@ ui <- fluidPage(
     })();
   "))),
       titlePanel("MSP Coffee Tracker -- Admin Page (BETA Version)"),
+      uiOutput("introText"),
       card(
         fluidRow(
           h2("Top-Up Accounts"),
@@ -108,6 +109,12 @@ ui <- fluidPage(
 )
 
 server <- function(input, output, session) {
+  
+  url = a("Joe Matthews", href="mailto:joe.matthews@ncl.ac.uk")
+  output$introText <- renderUI({
+    tagList("If you encounter any issues using this app, please contact ", url)
+  })
+  
   # Local stores
   balance_tbl     <- reactiveVal(tibble())
   leaderboard_tbl <- reactiveVal(tibble())
