@@ -42,8 +42,10 @@ looks_like_b64 <- function(txt) {
 cred_from_env <- function() {
   # 1) Explicit file path
   sa_path <- Sys.getenv("GOOGLE_APPLICATION_CREDENTIALS", "")
-  if (nzchar(sa_path) && file.exists(sa_path)) return(sa_path)
-  
+  if (nzchar(sa_path) && file.exists(sa_path)) {
+    return(sa_path)
+  }
+
   # 2) GSA_JSON can be RAW JSON or BASE64 JSON
   gsa_json <- Sys.getenv("GSA_JSON", "")
   if (nzchar(gsa_json)) {
@@ -55,14 +57,14 @@ cred_from_env <- function() {
       message("[gs_auth] GSA_JSON present but not recognised as JSON or base64.")
     }
   }
-  
+
   # 3) Dedicated base64 var
   gsa_b64 <- Sys.getenv("GSA_JSON_B64", "")
   if (nzchar(gsa_b64)) {
     return(decode_b64_to_tempfile(gsa_b64))
   }
-  
-  ""  # nothing found
+
+  "" # nothing found
 }
 
 .gs_auth <- function() {
@@ -75,7 +77,7 @@ cred_from_env <- function() {
         stop("Credential JSON found, but type != 'service_account'. Use a service account key.")
       }
     }
-    googlesheets4::gs4_deauth()  # ensure clean state
+    googlesheets4::gs4_deauth() # ensure clean state
     googlesheets4::gs4_auth(path = keyfile, scopes = "https://www.googleapis.com/auth/spreadsheets")
     googledrive::drive_deauth()
     googledrive::drive_auth(path = keyfile)
@@ -107,8 +109,10 @@ ensure_sheets_exist <- function() {
   }
   if (!"config" %in% existing) {
     sheet_write(
-      tibble(key = c("coffee_price", "topup_threshold"),
-             value = c("0.5", "2.0")),
+      tibble(
+        key = c("coffee_price", "topup_threshold"),
+        value = c("0.5", "2.0")
+      ),
       ss = ss,
       sheet = "config"
     )
@@ -127,8 +131,8 @@ ensure_sheets_exist <- function() {
 }
 
 # --- the rest of your helpers (unchanged) ---
-coerce_numeric_safe  <- function(x) suppressWarnings(as.numeric(x))
-coerce_integer_safe  <- function(x) suppressWarnings(as.integer(x))
+coerce_numeric_safe <- function(x) suppressWarnings(as.numeric(x))
+coerce_integer_safe <- function(x) suppressWarnings(as.integer(x))
 
 read_transactions <- function() {
   ss <- .sheet()
@@ -141,33 +145,51 @@ read_transactions <- function() {
     )
 }
 
-append_transaction <- function(staff_id, name, type = c("coffee","topup"),
+append_transaction <- function(staff_id, name, type = c("coffee", "topup"),
                                coffees = 0L, amount = 0, submitted_by = "app") {
   type <- match.arg(type)
   ss <- .sheet()
   df <- tibble(
-    timestamp   = lubridate::now(tzone = "UTC"),
-    staff_id    = as.character(staff_id),
-    name        = as.character(name),
-    type        = type,
-    coffees     = as.integer(coffees),
-    amount      = as.numeric(amount),
-    submitted_by= as.character(submitted_by)
+    timestamp = lubridate::now(tzone = "UTC"),
+    staff_id = as.character(staff_id),
+    name = as.character(name),
+    type = type,
+    coffees = as.integer(coffees),
+    amount = as.numeric(amount),
+    submitted_by = as.character(submitted_by)
   )
   sheet_append(df, ss = ss, sheet = "transactions")
   invisible(df)
 }
 
+most_common_name <- function(x) {
+  x <- trimws(x)
+  x <- x[nzchar(x)]
+  if (length(x) == 0) {
+    return(NA_character_)
+  }
+
+  tab <- table(x)
+  names(tab)[which.max(tab)]
+}
+
 balances <- function() {
   read_transactions() |>
-    group_by(staff_id, name) |>
+    mutate(
+      staff_id_norm = tolower(trimws(staff_id)), # case-insensitive ID
+      name_clean    = trimws(name)
+    ) |>
+    group_by(staff_id_norm) |>
     summarise(
-      balance = sum(amount, na.rm = TRUE),
-      coffees = sum(coffees, na.rm = TRUE),
-      .groups = "drop"
+      staff_id = first(staff_id_norm), # canonical ID
+      name     = most_common_name(name_clean), # modal name
+      balance  = sum(amount, na.rm = TRUE),
+      coffees  = sum(coffees, na.rm = TRUE),
+      .groups  = "drop"
     ) |>
     arrange(desc(balance))
 }
+
 
 balance_of <- function(staff_id) {
   b <- balances() |> filter(staff_id == !!staff_id)
